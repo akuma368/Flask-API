@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log Validator</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card mt-5">
+                    <div class="card-body">
+                        <h2 class="text-center mb-4">APGL VALIDATOR</h2>
+                        <form id="validator-form" action="/submit" method="post" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <label for="old-log">Upload Old Log</label>
+                                <input type="file" class="form-control" id="old-log" name="old_log" accept=".log" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="new-log">Upload New Log</label>
+                                <input type="file" class="form-control" id="new-log" name="new_log" accept=".log" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="gvExchange">Exchange</label>
+                                <input type="text" class="form-control" id="gvExchange" name="gvExchange" placeholder="Enter Exchange" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="gvmarket">Market</label>
+                                <input type="text" class="form-control" id="gvmarket" name="gvmarket" placeholder="Enter Market" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="gvmemocontent">Memo</label>
+                                <input type="text" class="form-control" id="gvmemocontent" name="gvmemocontent" placeholder="Enter Memo" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="gvExceptionList">Exception List</label>
+                                <input type="text" class="form-control" id="gvExceptionList" name="gvExceptionList" placeholder="Enter Exception list" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="comparison_options">Comparison Options</label>
+                                <select class="form-control" id="comparison_options" name="comparison_options" required>
+                                    <option value="">Select an option</option>
+                                    <option value="1">P10P3recv</option>
+                                    <option value="2">P10APSend</option>
+                                    <option value="3">P10P3Send</option>
+                                    <option value="4">P10APrecv</option>
+                                    <option value="5">All files base vs Cand</option>
+                                    <option value="6">All Files Cand vs base</option>
+                                    <option value="8">GLv5 Exp Vs Actual Base+Candidate</option>
+                                    <option value="9">GLv5 Exp Vs Actual Base</option>
+                                    <option value="10">GLv5 Exp Vs Actual Candidate</option>
+                                    <option value="11">GES Vs Non GES</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Submit</button>
+                        </form>
+                    </div>
+                </div>
+                <div id="loading" class="mt-4 text-center" style="display: none;">
+                    <div class="loading-text">Validation in Progress</div>
+                </div>
+                <div id="report-generated" class="mt-4 text-center" style="display: none;">
+                    <div class="report-generated-card">
+                        <h3>Reports Generated</h3>
+                        <a id="download-url" href="#" class="btn btn-success">Download Comparison Report</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.getElementById('validator-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+
+            document.getElementById('loading').style.display = 'block';
+
+            fetch('/submit', {
+                method: 'POST',
+                body: formData
+            }).then(response => response.json())
+            .then(data => {
+                document.getElementById('loading').style.display = 'none';
+                if (data.success) {
+                    document.getElementById('thank-you').style.display = 'block';
+                    document.getElementById('download-url').href = data.download_url;
+                } else {
+                    alert('There was an error processing your request.');
+                }
+            }).catch(error => {
+                document.getElementById('loading').style.display = 'none';
+                alert('There was an error processing your request.');
+            });
+        });
+    </script>
+</body>
+</html>
